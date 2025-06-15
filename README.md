@@ -32,9 +32,26 @@
 ├── lora_FT_hate.py # LoRA微调主程序
 ├── model_download.py # Qwen3模型下载工具
 ├── json2txt.py # 评估数据格式转换
-├── predictions_lora_racism_0.1671.json # 0.6B模型输出的json文件，评估分数为0.1671
-├── predictions_lora_racism_0.2238.json # 1.7B模型输出的json文件，评估分数为0.2238
-├── predictions_lora_racism_0.2775.json # 4B模型输出的json文件，评估分数为0.2775
+├── predictions_lora_racism_0.1671.json # 0.6B模型输出的json文件，比赛评估分数为0.1671
+├── predictions_lora_racism_0.2238.json # 1.7B模型输出的json文件，比赛评估分数为0.2238
+├── predictions_lora_racism_0.2775.json # 4B模型输出的json文件，比赛评估分数为0.2775
 ├── test0.6B_0.1671.txt # 经由predictions_lora_racism_0.1671.json转换，用于评估的txt文件
 ├── requirements.txt # 依赖文件
 └── README.md # 本项目文档
+```
+运行Qwen3模型下载
+```python
+python model_download.py --repo_id Qwen\Qwen3-0.6B
+```
+运行lora微调Qwen3模型
+```python
+python lora_FT_hate.py
+```
+运行模型评估
+```python
+python Short_eval_lora_hate.py
+```
+转换评估数据格式
+```python
+python json2txt.py
+```
