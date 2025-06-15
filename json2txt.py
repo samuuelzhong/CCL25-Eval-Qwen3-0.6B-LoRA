@@ -30,4 +30,4 @@ def extract_predictions_to_txt(input_json, output_txt):
 
 
 # 使用示例
-extract_predictions_to_txt('predictions_adlora_racism.json', 'test_myh.txt')
+extract_predictions_to_txt('predictions_lora_racism.json', 'test.txt')

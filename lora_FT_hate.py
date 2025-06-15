@@ -23,7 +23,7 @@ base_model = AutoModelForCausalLM.from_pretrained(model_name,
 print('原模型加载完毕')
 #----------------------------------------加载模型-------------------------------------------#
 
-#---------------------------------配置p-tuning v2微调参数-------------------------------------#
+#---------------------------------配置LoRA微调参数-------------------------------------#
 peft_config = LoraConfig(
     task_type=TaskType.CAUSAL_LM,
     inference_mode=False,
@@ -36,7 +36,7 @@ peft_config = LoraConfig(
 model = get_peft_model(base_model, peft_config)
 model.print_trainable_parameters()  # 预期约4.2M可训练参数
 
-#---------------------------------配置p-tuning v2微调参数-------------------------------------#
+#---------------------------------配置LoRA微调参数-------------------------------------#
 
 #-------------------------------定义采用已训练好的模型推理函数-------------------------------------#
 def generate_response(prompt, model):
@@ -57,19 +57,17 @@ def generate_response(prompt, model):
     return response.split("\n")[0].strip()  # 取第一个换行前的部分
 #-------------------------------定义采用已训练好的模型推理函数-------------------------------------#
 
-#----------------------------------------载入产流数据集-------------------------------------------#
+#----------------------------------------载入仇恨言论数据集-------------------------------------------#
 from datasets import load_dataset
 # 加载完整数据集
 train_dataset = load_dataset("json", data_files=r"D:\HydroLMM_PEFT\data\racism\annotated_train.json")["train"]
 test_dataset = load_dataset("json", data_files=r"D:\HydroLMM_PEFT\data\racism\annotated_test1.json")["train"]
 print('data length',len(train_dataset))
-# 选择前1000条数据
-#dataset = full_dataset.select(range(8000))  # 索引0-5000
+
 dataset = train_dataset
 def process_func(example):
     MAX_LENGTH = 1024
     # 将prompt进行tokenize，这里我们没有利用tokenizer进行填充和截断
-    # 这里我们自己进行截断，在DataLoader的collate_fn函数中进行填充
     instruction = tokenizer(example["instruction"] + "\n\n我需要你进行类似上述处理的句子是:" +
         example["content"] + "\n\n")
     # 将output进行tokenize，注意添加eos_token
@@ -107,7 +105,7 @@ print(train_dataset[:2])
 print(tokenizer.decode(train_dataset[1]["input_ids"]))
 print(tokenizer.decode(list(filter(lambda x: x != -100, train_dataset[1]["labels"]))))
 
-#----------------------------------------载入产流数据集-------------------------------------------#
+#----------------------------------------载入仇恨言论数据集-------------------------------------------#
 
 #---------------------------------Baseline model inference---------------------------------------#
 results = []
@@ -200,51 +198,6 @@ trainer = Trainer(
 )
 
 trainer.train()
-
-
-def plot_final_loss(log_path='./logs'):
-    """从TensorBoard日志生成专业图表"""
-    from torch.utils.tensorboard import SummaryWriter
-    import pandas as pd
-
-    # 解析TensorBoard日志
-    writer = SummaryWriter(log_path)
-    events = writer.event_accumulator.Tags()['scalars']
-    loss_data = [(s.step, s.value) for s in writer.scalars.Items('train/loss')]
-
-    # 绘制双坐标轴图表
-    fig, ax1 = plt.subplots(figsize=(14, 7))
-    ax1.plot([x[0] for x in loss_data], [x[1] for x in loss_data], 'b-', label='Loss')
-    ax1.set_xlabel('Training Steps')
-    ax1.set_ylabel('Loss', color='b')
-    ax1.tick_params(axis='y', labelcolor='b')
-
-    # 添加滑动平均曲线
-    window_size = max(1, len(loss_data) // 20)
-    df = pd.DataFrame(loss_data, columns=['step', 'loss'])
-    df['smooth_loss'] = df['loss'].rolling(window_size).mean()
-    ax1.plot(df['step'], df['smooth_loss'], 'r--', label=f'Smoothed (window={window_size})')
-
-    # 添加epoch标记
-    if hasattr(trainer.state, 'epoch'):
-        for epoch in range(1, int(trainer.state.epoch) + 1):
-            ax1.axvline(x=epoch * len(train_dataset), color='gray', linestyle=':', alpha=0.5)
-
-    plt.title('Training Loss with Smoothed Trend')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig('final_loss_curve.png', dpi=300, bbox_inches='tight')
-    plt.close()
-
-# 生成最终图表
-plot_final_loss()
-
-# 打印关键指标
-final_loss = trainer.state.log_history[-1]['loss']
-print(f"\n训练完成！最终loss值: {final_loss:.4f}")
-print(f"Loss曲线已保存至: loss_curve.png 和 final_loss_curve.png")
-
-print('训练完毕')
 
 # 创建保存模型的目录
 import os
