@@ -6,7 +6,7 @@
 本项目基于通义千问Qwen3系列模型（0.6B/1.7B/4B参数版本），采用LoRA（Low-Rank Adaptation）微调技术，构建针对种族主义内容的检测与评估系统。包含完整的训练数据、微调脚本和评估工具链。
 
 ## 文件结构
-├── Qwen3-0.6B-LoRA-Racism/ # 0.6B参数模型微调结果
+├── Qwen3-0.6B-LoRA-Racism/ # 0.6B参数模型微调结果\n
 │ ├── adapter_config.json # 微调参数配置
 │ ├── adapter_model.safetensors # 微调模型权重
 │ ├── added_tokens.json # 添加的token
