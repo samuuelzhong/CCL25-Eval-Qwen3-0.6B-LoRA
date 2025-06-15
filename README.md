@@ -39,6 +39,12 @@
 ├── requirements.txt # 依赖文件
 └── README.md # 本项目文档
 ```
+
+## 运行
+配置依赖
+```python
+pip install -r requirements.txt
+```
 运行Qwen3模型下载
 ```python
 python model_download.py --repo_id Qwen\Qwen3-0.6B
