@@ -1,0 +1,10 @@
+# 基础环境
+transformers>=4.37.0  # Hugging Face模型库
+datasets>=2.14.0  # 数据集加载与处理
+peft>=0.8.0  # 参数高效微调库
+accelerate>=0.27.0  # 分布式训练支持
+
+# 数据处理与工具
+numpy>=1.24.0
+pandas>=2.0.0
+tqdm>=4.65.0  # 进度条
